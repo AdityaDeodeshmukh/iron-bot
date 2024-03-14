@@ -1,8 +1,6 @@
 use std::thread;
-use test_scr::test;
 
 pub mod game_ui;
-pub mod test_scr;
 pub mod utils {
     pub mod util_enums;
     pub mod util_functions;
