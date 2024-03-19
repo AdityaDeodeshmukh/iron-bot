@@ -4,6 +4,40 @@ use super::{attack_maps::{  generate_bishop_attack_map, generate_king_attack_map
                 bitboard_constants::{BISHOP_MAGIC_NUMBERS, NUM_OCCUPANCY_SQR_BISHOP, NUM_OCCUPANCY_SQR_ROOK, ROOK_MAGIC_NUMBERS}, 
                 magic_bitboard_utils::set_occupancy}};
 
+pub struct attack_map {
+    pawn_attack_maps:[[u64;64];2],
+    knight_attack_maps:[u64;64],
+    king_attack_maps:[u64;64],
+    rook_relevant_occupancy:[u64;64],
+    bishop_relevant_occupancy:[u64;64],
+    bishop_attack_maps:[[u64;512];64],
+    rook_attack_maps:[[u64;4096];64]
+}
+
+impl attack_map {
+    fn new() -> attack_map{
+        let pawn_map;
+        let king_map;
+        let knight_map;
+        let bishop_relevant_occupancy_map;
+        let bishop_map;
+        let rook_relevant_occupancy_map;
+        let rook_map;
+        (pawn_map,king_map,knight_map) = init_simple_pieces();
+        (bishop_map,bishop_relevant_occupancy_map) = init_bishop();
+        (rook_map,rook_relevant_occupancy_map) = init_rook();
+        attack_map {
+            pawn_attack_maps:pawn_map,
+            knight_attack_maps:knight_map,
+            king_attack_maps:king_map,
+            rook_relevant_occupancy:rook_relevant_occupancy_map,
+            bishop_relevant_occupancy:bishop_relevant_occupancy_map,
+            bishop_attack_maps:bishop_map,
+            rook_attack_maps:rook_map
+        }
+    }
+}
+
 
 //get bishop attacks from the attack map based on the square and occupancy
 #[inline(always)]

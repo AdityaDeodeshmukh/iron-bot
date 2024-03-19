@@ -10,6 +10,9 @@ use crate::engine::bitboard_utils::bitboard_constants::{NUM_OCCUPANCY_SQR_BISHOP
 use super::bitboard_utils::base_operations::{get_bit, get_bit_nums, print_bit_board};
 use super::bitboard_utils::magic_bitboard_utils::set_occupancy;
 use super::bitboard_utils::rng_utils::generate_magic_number_candidate;
+use super::init::{init_bishop, init_simple_pieces};
+
+
 
 //generate a map that stores the squares a pawn can attack when placed on a certain position
 pub fn generate_pawn_attack_map(square:u8,side:PlayerColor) -> u64 {
