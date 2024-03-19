@@ -5,17 +5,17 @@ use super::{attack_maps::{  generate_bishop_attack_map, generate_king_attack_map
                 magic_bitboard_utils::set_occupancy}};
 
 pub struct attack_map {
-    pawn_attack_maps:[[u64;64];2],
-    knight_attack_maps:[u64;64],
-    king_attack_maps:[u64;64],
-    rook_relevant_occupancy:[u64;64],
-    bishop_relevant_occupancy:[u64;64],
-    bishop_attack_maps:[[u64;512];64],
-    rook_attack_maps:[[u64;4096];64]
+    pub pawn_attack_maps:[[u64;64];2],
+    pub knight_attack_maps:[u64;64],
+    pub king_attack_maps:[u64;64],
+    pub rook_relevant_occupancy:[u64;64],
+    pub bishop_relevant_occupancy:[u64;64],
+    pub bishop_attack_maps:[[u64;512];64],
+    pub rook_attack_maps:[[u64;4096];64]
 }
 
 impl attack_map {
-    fn new() -> attack_map{
+    pub fn new() -> attack_map{
         let pawn_map;
         let king_map;
         let knight_map;
