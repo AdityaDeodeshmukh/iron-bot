@@ -39,23 +39,7 @@ impl attack_map {
 }
 
 
-//get bishop attacks from the attack map based on the square and occupancy
-#[inline(always)]
-pub fn get_attacks_bishop(square:u8,occupancy:u64,bishop_masks:[u64;64],bishop_attacks:[[u64;512];64]) -> u64{
-    let mut occ = occupancy & bishop_masks[square as usize];
-    occ = occ.wrapping_mul(BISHOP_MAGIC_NUMBERS[square as usize]);
-    occ = occ >> (64-NUM_OCCUPANCY_SQR_BISHOP[square as usize]);
-    bishop_attacks[square as usize][occ as usize]
-}
 
-//get rook attacks from the attack map based on the square and occupancy
-#[inline(always)]
-pub fn get_attacks_rook(square:u8,occupancy:u64,rook_masks:[u64;64],rook_attacks:[[u64;4096];64]) -> u64{
-    let mut occ = occupancy & rook_masks[square as usize];
-    occ = occ.wrapping_mul(ROOK_MAGIC_NUMBERS[square as usize]);
-    occ = occ >> (64-NUM_OCCUPANCY_SQR_ROOK[square as usize]);
-    rook_attacks[square as usize][occ as usize]
-}
 
 
 //initialize the attack map for bishops with magic indices
