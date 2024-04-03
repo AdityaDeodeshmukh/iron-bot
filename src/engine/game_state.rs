@@ -16,8 +16,8 @@ castle_bk: If castling is possible for black on king's side
 castle_bq: If castling is possible for black on Queen's side
  */
 pub struct game_state {
-    pub piece_bitboards:[u64;12],
-    pub occupancy_bitboards:[u64;3],
+    pub piece_bitboards:[u64;6],
+    pub occupancy_bitboards:[u64;2],
     pub en_pessant_square:u8,
     pub side_to_move:bool,
     pub castle_wk:bool,
@@ -30,8 +30,8 @@ impl game_state {
     //generate an empty game state
     pub fn new() -> game_state {
         game_state {
-            piece_bitboards:[0;12],
-            occupancy_bitboards:[0;3],
+            piece_bitboards:[0;6],
+            occupancy_bitboards:[0;2],
             en_pessant_square:65,
             side_to_move:true,
             castle_wk:false,
@@ -43,8 +43,8 @@ impl game_state {
 
     //load a game state from a particular FEN
     pub fn new_from_fen(fen_string:&String) -> game_state {
-        let mut piece_bitboards:[u64;12] = [0;12];
-        let mut occupancies_bitboards:[u64;3] = [0;3];
+        let mut piece_bitboards:[u64;6] = [0;6];
+        let mut occupancies_bitboards:[u64;2] = [0;2];
         //let ascii_codes = ['P','R','N','B','Q','K','p','r','n','b','q','k'];
         let mut player_move = true; 
         let mut k_castling_w = false;
@@ -71,73 +71,73 @@ impl game_state {
                         //White King
                         'K' => {
                             piece_bitboards[5] = set_bit!(piece_bitboards[5],curr_ptr);
-                            occupancies_bitboards[0] = set_bit!(piece_bitboards[0],curr_ptr);
+                            occupancies_bitboards[0] = set_bit!(occupancies_bitboards[0],curr_ptr);
                             column+=1;
                         },
                         //White Queen
                         'Q' => {
                             piece_bitboards[4] = set_bit!(piece_bitboards[4],curr_ptr);
-                            occupancies_bitboards[0] = set_bit!(piece_bitboards[0],curr_ptr);
+                            occupancies_bitboards[0] = set_bit!(occupancies_bitboards[0],curr_ptr);
                             column+=1;
                         },
                         //White Bishop
                         'B' => {
                             piece_bitboards[3] = set_bit!(piece_bitboards[3],curr_ptr);
-                            occupancies_bitboards[0] = set_bit!(piece_bitboards[0],curr_ptr);
+                            occupancies_bitboards[0] = set_bit!(occupancies_bitboards[0],curr_ptr);
                             column+=1;
                         },
                         //White Knight
                         'N' => {
                             piece_bitboards[2] = set_bit!(piece_bitboards[2],curr_ptr);
-                            occupancies_bitboards[0] = set_bit!(piece_bitboards[0],curr_ptr);
+                            occupancies_bitboards[0] = set_bit!(occupancies_bitboards[0],curr_ptr);
                             column+=1;
                         },
                         //White Rook
                         'R' => {
                             piece_bitboards[1] = set_bit!(piece_bitboards[1],curr_ptr);
-                            occupancies_bitboards[0] = set_bit!(piece_bitboards[0],curr_ptr);
+                            occupancies_bitboards[0] = set_bit!(occupancies_bitboards[0],curr_ptr);
                             column+=1;
                         },
                         //White Pawn
                         'P' => {
                             piece_bitboards[0] = set_bit!(piece_bitboards[0],curr_ptr);
-                            occupancies_bitboards[0] = set_bit!(piece_bitboards[0],curr_ptr);
+                            occupancies_bitboards[0] = set_bit!(occupancies_bitboards[0],curr_ptr);
                             column+=1;
                         },
                         //Black King
                         'k' => {
-                            piece_bitboards[11] = set_bit!(piece_bitboards[11],curr_ptr);
-                            occupancies_bitboards[1] = set_bit!(piece_bitboards[1],curr_ptr);
+                            piece_bitboards[5] = set_bit!(piece_bitboards[5],curr_ptr);
+                            occupancies_bitboards[1] = set_bit!(occupancies_bitboards[1],curr_ptr);
                             column+=1;
                         },
                         //Black Queen
                         'q' => {
-                            piece_bitboards[10] = set_bit!(piece_bitboards[10],curr_ptr);
-                            occupancies_bitboards[1] = set_bit!(piece_bitboards[1],curr_ptr);
+                            piece_bitboards[4] = set_bit!(piece_bitboards[4],curr_ptr);
+                            occupancies_bitboards[1] = set_bit!(occupancies_bitboards[1],curr_ptr);
                             column+=1;
                         },
                         //Black Bishop
                         'b' => {
-                            piece_bitboards[9] = set_bit!(piece_bitboards[9],curr_ptr);
-                            occupancies_bitboards[1] = set_bit!(piece_bitboards[1],curr_ptr);
+                            piece_bitboards[3] = set_bit!(piece_bitboards[3],curr_ptr);
+                            occupancies_bitboards[1] = set_bit!(occupancies_bitboards[1],curr_ptr);
                             column+=1;
                         },
                         //Black Knight
                         'n' => {
-                            piece_bitboards[8] = set_bit!(piece_bitboards[8],curr_ptr);
-                            occupancies_bitboards[1] = set_bit!(piece_bitboards[1],curr_ptr);
+                            piece_bitboards[2] = set_bit!(piece_bitboards[2],curr_ptr);
+                            occupancies_bitboards[1] = set_bit!(occupancies_bitboards[1],curr_ptr);
                             column+=1;
                         },
                         //Black Rook
                         'r' => {
-                            piece_bitboards[7] = set_bit!(piece_bitboards[7],curr_ptr);
-                            occupancies_bitboards[1] = set_bit!(piece_bitboards[1],curr_ptr);
+                            piece_bitboards[1] = set_bit!(piece_bitboards[1],curr_ptr);
+                            occupancies_bitboards[1] = set_bit!(occupancies_bitboards[1],curr_ptr);
                             column+=1;
                         },
                         //Black Pawn
                         'p' => {
-                            piece_bitboards[6] = set_bit!(piece_bitboards[6],curr_ptr);
-                            occupancies_bitboards[1] = set_bit!(piece_bitboards[1],curr_ptr);
+                            piece_bitboards[0] = set_bit!(piece_bitboards[0],curr_ptr);
+                            occupancies_bitboards[1] = set_bit!(occupancies_bitboards[1],curr_ptr);
                             column+=1;
                         },
                         '0'..='9' => {
@@ -221,7 +221,13 @@ impl game_state {
                 let mut piece = -1;
                 for (i,bitboard) in self.piece_bitboards.iter().enumerate() {
                     if get_bit!(bitboard,square) != 0 {
-                        piece = i as i32;
+                        if get_bit!(self.occupancy_bitboards[1],square) == 0 {
+                            piece = i as i32;
+                        }
+                        else {
+                            piece = (i as i32) + 6;
+                        }
+                        
                     }
                 }
                 let ch;
