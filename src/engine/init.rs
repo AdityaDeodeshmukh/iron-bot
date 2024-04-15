@@ -4,6 +4,24 @@ use super::{attack_maps::{  generate_bishop_attack_map, generate_king_attack_map
                 bitboard_constants::{BISHOP_MAGIC_NUMBERS, NUM_OCCUPANCY_SQR_BISHOP, NUM_OCCUPANCY_SQR_ROOK, ROOK_MAGIC_NUMBERS}, 
                 magic_bitboard_utils::set_occupancy}};
 
+/*
+Attack Maps implementation Details:
+Pawn attack maps : 
+pawn_attack_maps[0] == White attack maps
+pawn_attack_maps[1] == Black attack maps
+knight_attack_maps:
+All attack maps for knight indexed by the square
+king_attack_maps:
+All attack maps for king indexed by the square
+rook_attack_maps:
+All attack maps for rook indexed by the rook magic numbers
+bishop_attack_maps:
+All attack maps for bisops indexed by the bishop magic numbers
+bishop_relevant_occupancy:
+All relevant occupancies for bishop
+rook_relevant_occupancy:
+All relevant occupancies for rook
+ */
 pub struct attack_map {
     pub pawn_attack_maps:[[u64;64];2],
     pub knight_attack_maps:[u64;64],
@@ -23,7 +41,7 @@ impl attack_map {
         let bishop_map;
         let rook_relevant_occupancy_map;
         let rook_map;
-        (pawn_map,king_map,knight_map) = init_simple_pieces();
+        (pawn_map,knight_map,king_map) = init_simple_pieces();
         (bishop_map,bishop_relevant_occupancy_map) = init_bishop();
         (rook_map,rook_relevant_occupancy_map) = init_rook();
         attack_map {

@@ -13,6 +13,7 @@ pub mod engine {
     pub mod init;
     pub mod move_utils;
     pub mod attack_maps;
+    pub mod move_generator;
     pub mod bitboard_utils{
         pub mod base_operations;
         pub mod bitboard_constants;

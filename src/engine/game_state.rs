@@ -5,9 +5,8 @@ use super::bitboard_utils::base_operations::set_bit;
 
 /*
 game_state struct ----->
-piece_bitboards:   [White Pawns, White Rooks, White Knights, White Bishops, White Queen, White King,
-                    Black Pawns, Black Rooks, Black Knights, Black Bishops, Black Queen, Black King]
-Occupancy_bitboards: [White Occupancies, Black Occupancies, All Occupancies]
+piece_bitboards:   [Pawns, Rooks, Knights, Bishops, Queen, King]
+Occupancy_bitboards: [White Occupancies, Black Occupancies]
 en_pessant_sqaure: Square on which en pessant is possible (65 if not possible)
 side_to_move: true if white's move, false if black's move
 castle_wk: If castling is possible for white on king's side
