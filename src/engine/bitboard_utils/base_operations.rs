@@ -45,8 +45,8 @@ pub unsafe fn get_bit_nums(a: u64) -> u32 {
 //get the number of trailing 0 bits that are set in a bitboard (BMI)
 #[inline(never)]
 #[cfg_attr(target_arch = "x86_64", target_feature(enable = "bmi1"))]
-pub unsafe fn get_lsb_index(a: u64) -> u32 {
-    a.trailing_zeros()
+pub unsafe fn get_lsb_index(a: u64) -> u8 {
+    a.trailing_zeros() as u8
 }
 
 
