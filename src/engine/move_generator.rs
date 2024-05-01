@@ -1,7 +1,7 @@
 
 use crate::{engine::bitboard_utils::base_operations::pop_bit, utils::util_enums::{PlayerColor}};
 
-use super::{bitboard_utils::{base_operations::{get_lsb_index, print_bit_board}, bitboard_constants::{FILLED_BOARD, IS_23456_ROW, IS_2_ROW, IS_34567_ROW, IS_7_ROW}}, game_state::game_state, init::attack_map, move_utils::{get_attacks_bishop, get_attacks_queen, get_attacks_rook}};
+use super::{bitboard_utils::{base_operations::{get_lsb_index, print_bit_board}, bitboard_constants::{BLACK_KING_SIDE_CASTLE, BLACK_QUEEN_SIDE_CASTLE, FILLED_BOARD, IS_23456_ROW, IS_2_ROW, IS_34567_ROW, IS_7_ROW, WHITE_KING_SIDE_CASTLE, WHITE_QUEEN_SIDE_CASTLE}}, game_state::game_state, init::attack_map, move_utils::{get_attacks_bishop, get_attacks_queen, get_attacks_rook}};
 
 //a function to check if a particular square is being attacked by a side
 #[inline(always)]
@@ -412,5 +412,41 @@ pub fn generate_moves(side:&PlayerColor,game:&game_state,piece_attack_map:&attac
         }
     }
     
-    
+    //Handling Castling Moves
+    starting_square = king_position;
+    if check_type == 0 {
+        match side {
+            PlayerColor::White => {
+                if game.castle_wk && (all_occupancies & WHITE_KING_SIDE_CASTLE) == 0
+                                  && is_square_attacked(5, &PlayerColor::Black, 
+                                                        &game, &piece_attack_map) == 0{
+                    ending_square = 6;
+                    println!("Castle from {}{} to {}{}",((starting_square%8+b'a') as char),((starting_square/8+b'1') as char),((ending_square%8+b'a') as char),((ending_square/8+b'1') as char));
+                    }
+                if game.castle_wq && (all_occupancies & WHITE_QUEEN_SIDE_CASTLE) == 0
+                                  && is_square_attacked(3, &PlayerColor::Black, 
+                                                        &game, &piece_attack_map) == 0{
+                    ending_square = 2;
+                    println!("Castle from {}{} to {}{}",((starting_square%8+b'a') as char),((starting_square/8+b'1') as char),((ending_square%8+b'a') as char),((ending_square/8+b'1') as char));
+
+
+                }
+            }
+            PlayerColor::Black => {
+                if game.castle_bk && (all_occupancies & BLACK_KING_SIDE_CASTLE) == 0
+                                  && is_square_attacked(61, &PlayerColor::White, 
+                                                        &game, &piece_attack_map) == 0{
+                    ending_square = 62;
+                    println!("Castle from {}{} to {}{}",((starting_square%8+b'a') as char),((starting_square/8+b'1') as char),((ending_square%8+b'a') as char),((ending_square/8+b'1') as char));
+                }
+                if game.castle_bq && (all_occupancies & BLACK_QUEEN_SIDE_CASTLE) == 0
+                                  && is_square_attacked(59, &PlayerColor::White, 
+                                                        &game, &piece_attack_map) == 0{
+                    ending_square = 58;
+                    println!("Castle from {}{} to {}{}",((starting_square%8+b'a') as char),((starting_square/8+b'1') as char),((ending_square%8+b'a') as char),((ending_square/8+b'1') as char));                                            
+
+                }
+            }
+        }
+    }
 }
