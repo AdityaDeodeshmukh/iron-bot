@@ -238,6 +238,19 @@ pub const BLACK_QUEEN_SIDE_CASTLE:u64 = 1008806316530991104;
     a b c d e f g h
 */
 
+pub const FILLED_BOARD:u64 = 18446744073709551615;
+/*
+8   1 1 1 1 1 1 1 1 
+7   1 1 1 1 1 1 1 1
+6   1 1 1 1 1 1 1 1
+5   1 1 1 1 1 1 1 1
+4   1 1 1 1 1 1 1 1
+3   1 1 1 1 1 1 1 1
+2   1 1 1 1 1 1 1 1
+1   1 1 1 1 1 1 1 1
+
+    a b c d e f g h
+*/
 
 //number of relevant bit positions for bishop at each square
 pub const NUM_OCCUPANCY_SQR_BISHOP:[u8;64] = [  6,  5,  5,  5,  5,  5,  5,  6,

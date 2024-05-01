@@ -1,7 +1,7 @@
 
 use crate::{engine::bitboard_utils::base_operations::pop_bit, utils::util_enums::{PlayerColor}};
 
-use super::{bitboard_utils::{base_operations::{get_lsb_index, print_bit_board}, bitboard_constants::{IS_23456_ROW, IS_2_ROW, IS_34567_ROW, IS_7_ROW}}, game_state::game_state, init::attack_map, move_utils::{get_attacks_bishop, get_attacks_queen, get_attacks_rook}};
+use super::{bitboard_utils::{base_operations::{get_lsb_index, print_bit_board}, bitboard_constants::{FILLED_BOARD, IS_23456_ROW, IS_2_ROW, IS_34567_ROW, IS_7_ROW}}, game_state::game_state, init::attack_map, move_utils::{get_attacks_bishop, get_attacks_queen, get_attacks_rook}};
 
 //a function to check if a particular square is being attacked by a side
 #[inline(always)]
@@ -85,7 +85,129 @@ pub fn print_attacked_squares(side:&PlayerColor,game:&game_state,piece_attack_ma
     println!("Side:{}",if matches!(side,PlayerColor::White){"White"}else{"Black"});
 }
 
+//a function to get whether a position is in check and the type of check (single, double, no check)
+#[inline(always)]
+pub fn get_check_type(side:&PlayerColor,game:&game_state,piece_attack_map:&attack_map,king_position:u8,all_occupancies:u64) -> (u8,u64) {
+    let mut defense_pattern:u64 = FILLED_BOARD;
+    let mut check_type:u8 = 0;
+    let mut attacker_map;
+    let mut opponent_attacker_pattern:u64;
+    let mut attacker_position:u8;
+    
+    match side {
+        PlayerColor::White => {
+            let bishop_attack_pattern = get_attacks_bishop(king_position, all_occupancies, 
+                                                piece_attack_map.bishop_relevant_occupancy, 
+                                                piece_attack_map.bishop_attack_maps);
+            
+            //handle diagonal attacks from bishops and queens
+            attacker_map = bishop_attack_pattern & ((game.piece_bitboards[3] | game.piece_bitboards[4]) & game.occupancy_bitboards[1]);
+            if attacker_map != 0 {
+                unsafe {
+                    attacker_position = get_lsb_index(attacker_map);
+                }
+                check_type = check_type + 1;
+                opponent_attacker_pattern = get_attacks_bishop(attacker_position, all_occupancies, 
+                                                        piece_attack_map.bishop_relevant_occupancy, 
+                                                        piece_attack_map.bishop_attack_maps);
+                defense_pattern = (bishop_attack_pattern & opponent_attacker_pattern) | attacker_map;
+            }
+            let rook_attack_pattern = get_attacks_rook(king_position, all_occupancies, 
+                                                piece_attack_map.rook_relevant_occupancy, 
+                                                piece_attack_map.rook_attack_maps);
+            
 
+
+            //handle straight attacks from rooks and queens
+            attacker_map = rook_attack_pattern & ((game.piece_bitboards[1] | game.piece_bitboards[4]) & game.occupancy_bitboards[1]);
+            if attacker_map != 0 {
+                unsafe {
+                    attacker_position = get_lsb_index(attacker_map);
+                }
+                check_type = check_type + 1;
+                if check_type >= 2{return (2,0)}
+                opponent_attacker_pattern = get_attacks_rook(attacker_position, all_occupancies, 
+                                                        piece_attack_map.rook_relevant_occupancy, 
+                                                        piece_attack_map.rook_attack_maps);
+                defense_pattern = (rook_attack_pattern & opponent_attacker_pattern) | attacker_map;
+            }
+
+            //handle attacks from knights
+            let knight_attack_pattern = piece_attack_map.knight_attack_maps[king_position as usize];
+            attacker_map = knight_attack_pattern & (game.piece_bitboards[2]  & game.occupancy_bitboards[1]);
+            if attacker_map != 0 {
+                check_type = check_type + 1;
+                if check_type >= 2{return (2,0)}               
+                defense_pattern = attacker_map;
+            }
+
+            //handle attacks from pawns
+            let pawn_attack_pattern = piece_attack_map.pawn_attack_maps[0][king_position as usize];
+            attacker_map = pawn_attack_pattern & (game.piece_bitboards[0] & game.occupancy_bitboards[1]);
+            if attacker_map != 0 {
+                check_type = check_type + 1;
+                if check_type >= 2{return (2,0)}               
+                defense_pattern = attacker_map ;
+            }
+        }
+        PlayerColor::Black => {
+            let bishop_attack_pattern = get_attacks_bishop(king_position, all_occupancies, 
+                                                piece_attack_map.bishop_relevant_occupancy, 
+                                                piece_attack_map.bishop_attack_maps);
+            
+            //handle diagonal attacks from bishops and queens
+            attacker_map = bishop_attack_pattern & ((game.piece_bitboards[3] | game.piece_bitboards[4]) & game.occupancy_bitboards[0]);
+            if attacker_map != 0 {
+                unsafe {
+                    attacker_position = get_lsb_index(attacker_map);
+                }
+                check_type = check_type + 1;
+                opponent_attacker_pattern = get_attacks_bishop(attacker_position, all_occupancies, 
+                                                        piece_attack_map.bishop_relevant_occupancy, 
+                                                        piece_attack_map.bishop_attack_maps);
+                defense_pattern = (bishop_attack_pattern & opponent_attacker_pattern) | attacker_map;
+            }
+            let rook_attack_pattern = get_attacks_rook(king_position, all_occupancies, 
+                                                piece_attack_map.rook_relevant_occupancy, 
+                                                piece_attack_map.rook_attack_maps);
+            
+
+
+            //handle straight attacks from rooks and queens
+            attacker_map = rook_attack_pattern & ((game.piece_bitboards[1] | game.piece_bitboards[4]) & game.occupancy_bitboards[0]);
+            if attacker_map != 0 {
+                unsafe {
+                    attacker_position = get_lsb_index(attacker_map);
+                }
+                check_type = check_type + 1;
+                if check_type >= 2{return (2,0)}
+                opponent_attacker_pattern = get_attacks_rook(attacker_position, all_occupancies, 
+                                                        piece_attack_map.rook_relevant_occupancy, 
+                                                        piece_attack_map.rook_attack_maps);
+                defense_pattern = (rook_attack_pattern & opponent_attacker_pattern) | attacker_map;
+            }
+
+            //handle attacks from knights
+            let knight_attack_pattern = piece_attack_map.knight_attack_maps[king_position as usize];
+            attacker_map = knight_attack_pattern & (game.piece_bitboards[2]  & game.occupancy_bitboards[0]);
+            if attacker_map != 0 {
+                check_type = check_type + 1;
+                if check_type >= 2{return (2,0)}               
+                defense_pattern = attacker_map;
+            }
+
+            //handle attacks from pawns
+            let pawn_attack_pattern = piece_attack_map.pawn_attack_maps[1][king_position as usize];
+            attacker_map = pawn_attack_pattern & (game.piece_bitboards[0] & game.occupancy_bitboards[0]);
+            if attacker_map != 0 {
+                check_type = check_type + 1;
+                if check_type >= 2{return (2,0)}               
+                defense_pattern = attacker_map;
+            }
+        }
+    }
+    return (check_type,defense_pattern);
+}   
 
 pub fn generate_moves(side:&PlayerColor,game:&game_state,piece_attack_map:&attack_map) {
     let mut starting_square:u8 ;
@@ -93,6 +215,26 @@ pub fn generate_moves(side:&PlayerColor,game:&game_state,piece_attack_map:&attac
     let mut single_pawn_moves:u64;
     let all_occupancies = game.occupancy_bitboards[0] | game.occupancy_bitboards[1];
     let side_pawn_bitboard;
+    let defense_map;
+    let check_type;
+    let king_position;
+
+    //getting check status for king
+    match side {
+        PlayerColor::White => {
+            unsafe {
+                king_position = get_lsb_index(game.piece_bitboards[5] & game.occupancy_bitboards[0]);
+            }
+        }
+        PlayerColor::Black => {
+            unsafe {
+                king_position = get_lsb_index(game.piece_bitboards[5] & game.occupancy_bitboards[1]);
+            }
+        } 
+    }
+    (check_type,defense_map) = get_check_type(side,&game,piece_attack_map,king_position,all_occupancies);
+
+
     // Capturing pawn moves
     match side {
         PlayerColor::White => {
@@ -270,25 +412,5 @@ pub fn generate_moves(side:&PlayerColor,game:&game_state,piece_attack_map:&attac
         }
     }
     
-    //Handling Castling Moves
-    let king_position;
-    match side {
-        PlayerColor::White => {
-            unsafe {
-                king_position = get_lsb_index(game.piece_bitboards[5] & game.occupancy_bitboards[0]);
-            }
-        }
-        PlayerColor::Black => {
-            unsafe {
-                king_position = get_lsb_index(game.piece_bitboards[5] & game.occupancy_bitboards[1]);
-            }
-        } 
-    }
-
-
-
-
-    
-
     
 }
