@@ -1,7 +1,7 @@
 
 use crate::{engine::bitboard_utils::base_operations::pop_bit, utils::util_enums::{PlayerColor}};
 
-use super::{bitboard_utils::{base_operations::{get_lsb_index, print_bit_board}, bitboard_constants::{BLACK_KING_SIDE_CASTLE, BLACK_QUEEN_SIDE_CASTLE, FILLED_BOARD, IS_23456_ROW, IS_2_ROW, IS_34567_ROW, IS_7_ROW, WHITE_KING_SIDE_CASTLE, WHITE_QUEEN_SIDE_CASTLE}}, game_state::game_state, init::attack_map, move_utils::{get_attacks_bishop, get_attacks_queen, get_attacks_rook}};
+use super::{bitboard_utils::{base_operations::{get_bit, get_lsb_index, print_bit_board}, bitboard_constants::{BLACK_KING_SIDE_CASTLE, BLACK_QUEEN_SIDE_CASTLE, FILLED_BOARD, IS_23456_ROW, IS_2_ROW, IS_34567_ROW, IS_7_ROW, WHITE_KING_SIDE_CASTLE, WHITE_QUEEN_SIDE_CASTLE}}, game_state::game_state, init::attack_map, move_utils::{get_attacks_bishop, get_attacks_queen, get_attacks_rook}};
 
 //a function to check if a particular square is being attacked by a side
 #[inline(always)]
@@ -222,7 +222,15 @@ pub fn generate_moves(side:&PlayerColor,game:&game_state,piece_attack_map:&attac
             game.occupancy_bitboards[1]
         }
     };
-    let side_pawn_bitboard;
+    let opponent_occupancies = match side {
+        PlayerColor::White => {
+            game.occupancy_bitboards[1]
+        }
+        PlayerColor::Black => {
+            game.occupancy_bitboards[0]
+        }
+    };
+    
     let defense_map;
     let check_type;
     let king_position;
@@ -235,7 +243,7 @@ pub fn generate_moves(side:&PlayerColor,game:&game_state,piece_attack_map:&attac
 
 
     // Capturing pawn moves
-    side_pawn_bitboard = game.piece_bitboards[0] & player_occupancies;
+    let side_pawn_bitboard =game.piece_bitboards[0] & player_occupancies;
     //Handling Single Pawn moves
     match side {
         PlayerColor::White => {
@@ -259,7 +267,7 @@ pub fn generate_moves(side:&PlayerColor,game:&game_state,piece_attack_map:&attac
                 ending_square = starting_square - 8;
             }
         }
-        println!("Pawn move from {}{} to {}{}",((starting_square%8+b'a') as char),((starting_square/8+b'1') as char),((ending_square%8+b'a') as char),((ending_square/8+b'1') as char));
+        println!("{}{} {}{} Pawn move",((starting_square%8+b'a') as char),((starting_square/8+b'1') as char),((ending_square%8+b'a') as char),((ending_square/8+b'1') as char));
         single_pawn_moves= pop_bit!(single_pawn_moves,starting_square);
     }
 
@@ -288,7 +296,7 @@ pub fn generate_moves(side:&PlayerColor,game:&game_state,piece_attack_map:&attac
                 ending_square = starting_square - 16;
             }
         }
-        println!("Pawn move from {}{} to {}{}",((starting_square%8+b'a') as char),((starting_square/8+b'1') as char),((ending_square%8+b'a') as char),((ending_square/8+b'1') as char));
+        println!("{}{} {}{} Pawn move",((starting_square%8+b'a') as char),((starting_square/8+b'1') as char),((ending_square%8+b'a') as char),((ending_square/8+b'1') as char));
         double_pawn_moves= pop_bit!(double_pawn_moves,starting_square);
     }
 
@@ -314,10 +322,10 @@ pub fn generate_moves(side:&PlayerColor,game:&game_state,piece_attack_map:&attac
                 ending_square = starting_square - 8;
             }
         }
-        println!("Pawn promotion from {}{} to {}{} to Queen",((starting_square%8+b'a') as char),((starting_square/8+b'1') as char),((ending_square%8+b'a') as char),((ending_square/8+b'1') as char));
-        println!("Pawn promotion from {}{} to {}{} to Rook",((starting_square%8+b'a') as char),((starting_square/8+b'1') as char),((ending_square%8+b'a') as char),((ending_square/8+b'1') as char));
-        println!("Pawn promotion from {}{} to {}{} to Bishop",((starting_square%8+b'a') as char),((starting_square/8+b'1') as char),((ending_square%8+b'a') as char),((ending_square/8+b'1') as char));
-        println!("Pawn promotion from {}{} to {}{} to Knight",((starting_square%8+b'a') as char),((starting_square/8+b'1') as char),((ending_square%8+b'a') as char),((ending_square/8+b'1') as char));
+        println!("{}{} {}{} Pawn promotion to Queen",((starting_square%8+b'a') as char),((starting_square/8+b'1') as char),((ending_square%8+b'a') as char),((ending_square/8+b'1') as char));
+        println!("{}{} {}{} Pawn promotion to Rook",((starting_square%8+b'a') as char),((starting_square/8+b'1') as char),((ending_square%8+b'a') as char),((ending_square/8+b'1') as char));
+        println!("{}{} {}{} Pawn promotion to Bishop",((starting_square%8+b'a') as char),((starting_square/8+b'1') as char),((ending_square%8+b'a') as char),((ending_square/8+b'1') as char));
+        println!("{}{} {}{} Pawn promotion to Knight",((starting_square%8+b'a') as char),((starting_square/8+b'1') as char),((ending_square%8+b'a') as char),((ending_square/8+b'1') as char));
 
         pawn_promotion_moves= pop_bit!(pawn_promotion_moves,starting_square);
     }
@@ -347,27 +355,27 @@ pub fn generate_moves(side:&PlayerColor,game:&game_state,piece_attack_map:&attac
             match side{
                 PlayerColor::White => {
                     if ending_square >= 56 {
-                        println!("Pawn Capture Promotion from {}{} to {}{} to Queen",((starting_square%8+b'a') as char),((starting_square/8+b'1') as char),((ending_square%8+b'a') as char),((ending_square/8+b'1') as char));
-                        println!("Pawn Capture Promotion from {}{} to {}{} to Rook",((starting_square%8+b'a') as char),((starting_square/8+b'1') as char),((ending_square%8+b'a') as char),((ending_square/8+b'1') as char));
-                        println!("Pawn Capture Promotion from {}{} to {}{} to Bishop",((starting_square%8+b'a') as char),((starting_square/8+b'1') as char),((ending_square%8+b'a') as char),((ending_square/8+b'1') as char));
-                        println!("Pawn Capture Promotion from {}{} to {}{} to Knight",((starting_square%8+b'a') as char),((starting_square/8+b'1') as char),((ending_square%8+b'a') as char),((ending_square/8+b'1') as char));
+                        println!("{}{} {}{} Pawn Capture Promotion to Queen",((starting_square%8+b'a') as char),((starting_square/8+b'1') as char),((ending_square%8+b'a') as char),((ending_square/8+b'1') as char));
+                        println!("{}{} {}{} Pawn Capture Promotion to Rook",((starting_square%8+b'a') as char),((starting_square/8+b'1') as char),((ending_square%8+b'a') as char),((ending_square/8+b'1') as char));
+                        println!("{}{} {}{} Pawn Capture Promotion to Bishop",((starting_square%8+b'a') as char),((starting_square/8+b'1') as char),((ending_square%8+b'a') as char),((ending_square/8+b'1') as char));
+                        println!("{}{} {}{} Pawn Capture Promotion to Knight",((starting_square%8+b'a') as char),((starting_square/8+b'1') as char),((ending_square%8+b'a') as char),((ending_square/8+b'1') as char));
                         pawn_attack_map = pop_bit!(pawn_attack_map,ending_square);
                         continue;
                     }
                 }
                 PlayerColor::Black => {
                     if ending_square <= 7 {
-                        println!("Pawn Capture Promotion from {}{} to {}{} to Queen",((starting_square%8+b'a') as char),((starting_square/8+b'1') as char),((ending_square%8+b'a') as char),((ending_square/8+b'1') as char));
-                        println!("Pawn Capture Promotion from {}{} to {}{} to Rook",((starting_square%8+b'a') as char),((starting_square/8+b'1') as char),((ending_square%8+b'a') as char),((ending_square/8+b'1') as char));
-                        println!("Pawn Capture Promotion from {}{} to {}{} to Bishop",((starting_square%8+b'a') as char),((starting_square/8+b'1') as char),((ending_square%8+b'a') as char),((ending_square/8+b'1') as char));
-                        println!("Pawn Capture Promotion from {}{} to {}{} to Knight",((starting_square%8+b'a') as char),((starting_square/8+b'1') as char),((ending_square%8+b'a') as char),((ending_square/8+b'1') as char));
+                        println!("{}{} {}{} Pawn Capture Promotion to Queen",((starting_square%8+b'a') as char),((starting_square/8+b'1') as char),((ending_square%8+b'a') as char),((ending_square/8+b'1') as char));
+                        println!("{}{} {}{} Pawn Capture Promotion to Rook",((starting_square%8+b'a') as char),((starting_square/8+b'1') as char),((ending_square%8+b'a') as char),((ending_square/8+b'1') as char));
+                        println!("{}{} {}{} Pawn Capture Promotion to Bishop",((starting_square%8+b'a') as char),((starting_square/8+b'1') as char),((ending_square%8+b'a') as char),((ending_square/8+b'1') as char));
+                        println!("{}{} {}{} Pawn Capture Promotion to Knight",((starting_square%8+b'a') as char),((starting_square/8+b'1') as char),((ending_square%8+b'a') as char),((ending_square/8+b'1') as char));
                         pawn_attack_map = pop_bit!(pawn_attack_map,ending_square);
                         continue;
                     }
                 }
             }
             //handling normal pawn captures
-            println!("Pawn Capture from {}{} to {}{}",((starting_square%8+b'a') as char),((starting_square/8+b'1') as char),((ending_square%8+b'a') as char),((ending_square/8+b'1') as char));
+            println!("{}{} {}{} Pawn Capture",((starting_square%8+b'a') as char),((starting_square/8+b'1') as char),((ending_square%8+b'a') as char),((ending_square/8+b'1') as char));
             pawn_attack_map = pop_bit!(pawn_attack_map,ending_square);
         }
         pawn_bitboard = pop_bit!(pawn_bitboard,starting_square); 
@@ -390,7 +398,7 @@ pub fn generate_moves(side:&PlayerColor,game:&game_state,piece_attack_map:&attac
                     unsafe {
                         starting_square = get_lsb_index(en_pessant_attackers);
                     }
-                    println!("Pawn en pessant capture from {}{} to {}{}",((starting_square%8+b'a') as char),((starting_square/8+b'1') as char),((en_pessant_square%8+b'a') as char),((en_pessant_square/8+b'1') as char));
+                    println!("{}{} {}{} En Pessant",((starting_square%8+b'a') as char),((starting_square/8+b'1') as char),((en_pessant_square%8+b'a') as char),((en_pessant_square/8+b'1') as char));
                     en_pessant_attackers = pop_bit!(en_pessant_attackers,starting_square);
                 }
             }
@@ -413,7 +421,7 @@ pub fn generate_moves(side:&PlayerColor,game:&game_state,piece_attack_map:&attac
                                   && is_square_attacked(5, &PlayerColor::Black, 
                                                         &game, &piece_attack_map) == 0{
                     ending_square = 6;
-                    println!("Castle from {}{} to {}{}",((starting_square%8+b'a') as char),((starting_square/8+b'1') as char),((ending_square%8+b'a') as char),((ending_square/8+b'1') as char));
+                    println!("{}{} {}{} King Side Castle",((starting_square%8+b'a') as char),((starting_square/8+b'1') as char),((ending_square%8+b'a') as char),((ending_square/8+b'1') as char));
                     }
                 
                 //Queen side Castling
@@ -421,7 +429,7 @@ pub fn generate_moves(side:&PlayerColor,game:&game_state,piece_attack_map:&attac
                                   && is_square_attacked(3, &PlayerColor::Black, 
                                                         &game, &piece_attack_map) == 0{
                     ending_square = 2;
-                    println!("Castle from {}{} to {}{}",((starting_square%8+b'a') as char),((starting_square/8+b'1') as char),((ending_square%8+b'a') as char),((ending_square/8+b'1') as char));
+                    println!("{}{} {}{} Queen Side Castle",((starting_square%8+b'a') as char),((starting_square/8+b'1') as char),((ending_square%8+b'a') as char),((ending_square/8+b'1') as char));
 
 
                 }
@@ -432,7 +440,7 @@ pub fn generate_moves(side:&PlayerColor,game:&game_state,piece_attack_map:&attac
                                   && is_square_attacked(61, &PlayerColor::White, 
                                                         &game, &piece_attack_map) == 0{
                     ending_square = 62;
-                    println!("Castle from {}{} to {}{}",((starting_square%8+b'a') as char),((starting_square/8+b'1') as char),((ending_square%8+b'a') as char),((ending_square/8+b'1') as char));
+                    println!("{}{} {}{} King Side Castle",((starting_square%8+b'a') as char),((starting_square/8+b'1') as char),((ending_square%8+b'a') as char),((ending_square/8+b'1') as char));
                 }
 
                 //Queen Side Castling
@@ -440,10 +448,35 @@ pub fn generate_moves(side:&PlayerColor,game:&game_state,piece_attack_map:&attac
                                   && is_square_attacked(59, &PlayerColor::White, 
                                                         &game, &piece_attack_map) == 0{
                     ending_square = 58;
-                    println!("Castle from {}{} to {}{}",((starting_square%8+b'a') as char),((starting_square/8+b'1') as char),((ending_square%8+b'a') as char),((ending_square/8+b'1') as char));                                            
+                    println!("{}{} {}{} Queen Side Castle",((starting_square%8+b'a') as char),((starting_square/8+b'1') as char),((ending_square%8+b'a') as char),((ending_square/8+b'1') as char));                                            
 
                 }
             }
         }
+    }
+
+    //Handling Knight Moves
+    let mut knight_bitboard = game.piece_bitboards[2] & player_occupancies;
+    let mut knight_attack_pattern:u64;
+    while knight_bitboard != 0{
+        unsafe{
+            starting_square = get_lsb_index(knight_bitboard);
+        }
+        
+        knight_attack_pattern = piece_attack_map.knight_attack_maps[starting_square as usize] & (!player_occupancies);
+        while knight_attack_pattern != 0 {
+            unsafe{
+                ending_square = get_lsb_index(knight_attack_pattern);
+            }
+
+            if(get_bit!(opponent_occupancies,ending_square)!=0){
+                println!("{}{} {}{} Knight Capture",((starting_square%8+b'a') as char),((starting_square/8+b'1') as char),((ending_square%8+b'a') as char),((ending_square/8+b'1') as char));                                            
+            }
+            else {
+                println!("{}{} {}{} Knight Move",((starting_square%8+b'a') as char),((starting_square/8+b'1') as char),((ending_square%8+b'a') as char),((ending_square/8+b'1') as char));                                            
+            }
+            knight_attack_pattern = pop_bit!(knight_attack_pattern,ending_square);
+        }
+        knight_bitboard = pop_bit!(knight_bitboard,starting_square);
     }
 }
