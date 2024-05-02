@@ -214,37 +214,28 @@ pub fn generate_moves(side:&PlayerColor,game:&game_state,piece_attack_map:&attac
     let mut ending_square:u8 ;
     let mut single_pawn_moves:u64;
     let all_occupancies = game.occupancy_bitboards[0] | game.occupancy_bitboards[1];
+    let player_occupancies = match side {
+        PlayerColor::White => {
+            game.occupancy_bitboards[0]
+        }
+        PlayerColor::Black => {
+            game.occupancy_bitboards[1]
+        }
+    };
     let side_pawn_bitboard;
     let defense_map;
     let check_type;
     let king_position;
 
     //getting check status for king
-    match side {
-        PlayerColor::White => {
-            unsafe {
-                king_position = get_lsb_index(game.piece_bitboards[5] & game.occupancy_bitboards[0]);
-            }
-        }
-        PlayerColor::Black => {
-            unsafe {
-                king_position = get_lsb_index(game.piece_bitboards[5] & game.occupancy_bitboards[1]);
-            }
-        } 
+    unsafe {
+        king_position = get_lsb_index(game.piece_bitboards[5] & player_occupancies);
     }
     (check_type,defense_map) = get_check_type(side,&game,piece_attack_map,king_position,all_occupancies);
 
 
     // Capturing pawn moves
-    match side {
-        PlayerColor::White => {
-            side_pawn_bitboard = game.piece_bitboards[0] & game.occupancy_bitboards[0];
-        }
-        PlayerColor::Black => {
-            side_pawn_bitboard = game.piece_bitboards[0] & game.occupancy_bitboards[1];
-        }
-    }
-
+    side_pawn_bitboard = game.piece_bitboards[0] & player_occupancies;
     //Handling Single Pawn moves
     match side {
         PlayerColor::White => {
@@ -417,12 +408,15 @@ pub fn generate_moves(side:&PlayerColor,game:&game_state,piece_attack_map:&attac
     if check_type == 0 {
         match side {
             PlayerColor::White => {
+                //King Side Castling
                 if game.castle_wk && (all_occupancies & WHITE_KING_SIDE_CASTLE) == 0
                                   && is_square_attacked(5, &PlayerColor::Black, 
                                                         &game, &piece_attack_map) == 0{
                     ending_square = 6;
                     println!("Castle from {}{} to {}{}",((starting_square%8+b'a') as char),((starting_square/8+b'1') as char),((ending_square%8+b'a') as char),((ending_square/8+b'1') as char));
                     }
+                
+                //Queen side Castling
                 if game.castle_wq && (all_occupancies & WHITE_QUEEN_SIDE_CASTLE) == 0
                                   && is_square_attacked(3, &PlayerColor::Black, 
                                                         &game, &piece_attack_map) == 0{
@@ -433,12 +427,15 @@ pub fn generate_moves(side:&PlayerColor,game:&game_state,piece_attack_map:&attac
                 }
             }
             PlayerColor::Black => {
+                //King side Castling
                 if game.castle_bk && (all_occupancies & BLACK_KING_SIDE_CASTLE) == 0
                                   && is_square_attacked(61, &PlayerColor::White, 
                                                         &game, &piece_attack_map) == 0{
                     ending_square = 62;
                     println!("Castle from {}{} to {}{}",((starting_square%8+b'a') as char),((starting_square/8+b'1') as char),((ending_square%8+b'a') as char),((ending_square/8+b'1') as char));
                 }
+
+                //Queen Side Castling
                 if game.castle_bq && (all_occupancies & BLACK_QUEEN_SIDE_CASTLE) == 0
                                   && is_square_attacked(59, &PlayerColor::White, 
                                                         &game, &piece_attack_map) == 0{
