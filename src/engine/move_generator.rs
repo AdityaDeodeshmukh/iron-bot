@@ -565,4 +565,29 @@ pub fn generate_moves(side:&PlayerColor,game:&game_state,piece_attack_map:&attac
         }
         queen_bitboard = pop_bit!(queen_bitboard,starting_square);
     }
+
+    //Handling King Moves
+    let mut king_bitboard = game.piece_bitboards[5] & player_occupancies;
+    let mut king_attack_pattern:u64;
+    while king_bitboard != 0{
+        unsafe{
+            starting_square = get_lsb_index(king_bitboard);
+        }
+        
+        king_attack_pattern = piece_attack_map.king_attack_maps[starting_square as usize] & (!player_occupancies);
+        while king_attack_pattern != 0 {
+            unsafe{
+                ending_square = get_lsb_index(king_attack_pattern);
+            }
+
+            if(get_bit!(opponent_occupancies,ending_square)!=0){
+                println!("{}{} {}{} King Capture",((starting_square%8+b'a') as char),((starting_square/8+b'1') as char),((ending_square%8+b'a') as char),((ending_square/8+b'1') as char));                                            
+            }
+            else {
+                println!("{}{} {}{} King Move",((starting_square%8+b'a') as char),((starting_square/8+b'1') as char),((ending_square%8+b'a') as char),((ending_square/8+b'1') as char));                                            
+            }
+            king_attack_pattern = pop_bit!(king_attack_pattern,ending_square);
+        }
+        king_bitboard = pop_bit!(king_bitboard,starting_square);
+    }
 }
