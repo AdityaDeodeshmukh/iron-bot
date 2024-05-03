@@ -11,7 +11,7 @@ A fully functioning bitboard based chess engine written completely in Rust 🦀
 - [x] Game UI
 - [x] Basic bitboard utilities
 - [x] Precomputed attack maps
-- [ ] Bitboard game states
+- [x] Bitboard game states
 - [ ] Move Generation
 - [ ] Minimax implementation
 - [ ] Alpha Beta Pruning

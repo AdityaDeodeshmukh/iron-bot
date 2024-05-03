@@ -210,8 +210,8 @@ pub fn get_check_type(side:&PlayerColor,game:&game_state,piece_attack_map:&attac
 }   
 
 pub fn generate_moves(side:&PlayerColor,game:&game_state,piece_attack_map:&attack_map) {
-    let mut starting_square:u8 ;
-    let mut ending_square:u8 ;
+    let mut starting_square:u8;
+    let mut ending_square:u8;
     let mut single_pawn_moves:u64;
     let all_occupancies = game.occupancy_bitboards[0] | game.occupancy_bitboards[1];
     let player_occupancies = match side {
@@ -478,5 +478,91 @@ pub fn generate_moves(side:&PlayerColor,game:&game_state,piece_attack_map:&attac
             knight_attack_pattern = pop_bit!(knight_attack_pattern,ending_square);
         }
         knight_bitboard = pop_bit!(knight_bitboard,starting_square);
+    }
+
+    //Handling Bishop Moves
+    let mut bishop_bitboard = game.piece_bitboards[3] & player_occupancies;
+    let mut bishop_attack_pattern:u64;
+    while bishop_bitboard != 0{
+        unsafe{
+            starting_square = get_lsb_index(bishop_bitboard);
+        }
+        
+        bishop_attack_pattern = get_attacks_bishop(starting_square, all_occupancies, 
+                                                    piece_attack_map.bishop_relevant_occupancy, 
+                                                    piece_attack_map.bishop_attack_maps) 
+                                                    & (!player_occupancies);
+        while bishop_attack_pattern != 0 {
+            unsafe{
+                ending_square = get_lsb_index(bishop_attack_pattern);
+            }
+
+            if(get_bit!(opponent_occupancies,ending_square)!=0){
+                println!("{}{} {}{} Bishop Capture",((starting_square%8+b'a') as char),((starting_square/8+b'1') as char),((ending_square%8+b'a') as char),((ending_square/8+b'1') as char));                                            
+            }
+            else {
+                println!("{}{} {}{} Bishop Move",((starting_square%8+b'a') as char),((starting_square/8+b'1') as char),((ending_square%8+b'a') as char),((ending_square/8+b'1') as char));                                            
+            }
+            bishop_attack_pattern = pop_bit!(bishop_attack_pattern,ending_square);
+        }
+        bishop_bitboard = pop_bit!(bishop_bitboard,starting_square);
+    }
+
+    //Handling Rook Moves
+    let mut rook_bitboard = game.piece_bitboards[1] & player_occupancies;
+    let mut rook_attack_pattern:u64;
+    while rook_bitboard != 0{
+        unsafe{
+            starting_square = get_lsb_index(rook_bitboard);
+        }
+        
+        rook_attack_pattern = get_attacks_rook(starting_square, all_occupancies, 
+                                                    piece_attack_map.rook_relevant_occupancy, 
+                                                    piece_attack_map.rook_attack_maps) 
+                                                    & (!player_occupancies);
+        while rook_attack_pattern != 0 {
+            unsafe{
+                ending_square = get_lsb_index(rook_attack_pattern);
+            }
+
+            if(get_bit!(opponent_occupancies,ending_square)!=0){
+                println!("{}{} {}{} Rook Capture",((starting_square%8+b'a') as char),((starting_square/8+b'1') as char),((ending_square%8+b'a') as char),((ending_square/8+b'1') as char));                                            
+            }
+            else {
+                println!("{}{} {}{} Rook Move",((starting_square%8+b'a') as char),((starting_square/8+b'1') as char),((ending_square%8+b'a') as char),((ending_square/8+b'1') as char));                                            
+            }
+            rook_attack_pattern = pop_bit!(rook_attack_pattern,ending_square);
+        }
+        rook_bitboard = pop_bit!(rook_bitboard,starting_square);
+    }
+
+    //Handling Queen Moves
+    let mut queen_bitboard = game.piece_bitboards[4] & player_occupancies;
+    let mut queen_attack_pattern:u64;
+    while queen_bitboard != 0{
+        unsafe{
+            starting_square = get_lsb_index(queen_bitboard);
+        }
+        
+        queen_attack_pattern = get_attacks_queen(starting_square, all_occupancies, 
+                                                    piece_attack_map.rook_relevant_occupancy, 
+                                                    piece_attack_map.rook_attack_maps,
+                                                    piece_attack_map.bishop_relevant_occupancy,
+                                                    piece_attack_map.bishop_attack_maps) 
+                                                    & (!player_occupancies);
+        while queen_attack_pattern != 0 {
+            unsafe{
+                ending_square = get_lsb_index(queen_attack_pattern);
+            }
+
+            if(get_bit!(opponent_occupancies,ending_square)!=0){
+                println!("{}{} {}{} Queen Capture",((starting_square%8+b'a') as char),((starting_square/8+b'1') as char),((ending_square%8+b'a') as char),((ending_square/8+b'1') as char));                                            
+            }
+            else {
+                println!("{}{} {}{} Queen Move",((starting_square%8+b'a') as char),((starting_square/8+b'1') as char),((ending_square%8+b'a') as char),((ending_square/8+b'1') as char));                                            
+            }
+            queen_attack_pattern = pop_bit!(queen_attack_pattern,ending_square);
+        }
+        queen_bitboard = pop_bit!(queen_bitboard,starting_square);
     }
 }
