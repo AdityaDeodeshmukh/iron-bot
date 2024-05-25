@@ -13,10 +13,39 @@ Castling Flag:          1000 0000 0000 0000 0000 0000   0x800000
 */
 pub struct MoveList {
     moves:[u32;256],
-    count:u32
+    count:u8,
+    player: PlayerColor
+}
+impl MoveList {
+    pub fn new(player_color: PlayerColor) -> MoveList {
+        MoveList {
+            moves: [0;256],
+            count: 0,
+            player: player_color
+        }
+    }
+
+    pub fn add_move(&mut self,chess_move:u32){
+        self.moves[self.count as usize] = chess_move;
+        self.count += 1;
+    }
+
+    pub fn print_move_list(self,is_unicode: bool) {
+        println!("Move        Piece_Moved   Piece_Captured    Capture    Double    Enpass    castling");
+        if self.count == 0 {
+            println!("            No moves in the movelist");
+            return;
+        }
+        println!("{}",self.count);
+        for i in 0..(self.count) {
+            print_move(self.moves[i as usize], is_unicode,&self.player)
+        }
+    }
 }
 
-pub fn print_move(chess_move: u32, is_unicode: bool, player: PlayerColor) {
+
+
+pub fn print_move(chess_move: u32, is_unicode: bool, player: &PlayerColor) {
     let starting_square = decode_initial_square!(chess_move) as u8;
     let ending_square = decode_final_square!(chess_move) as u8;
     let unicode_chars = ['♟','♜','♞','♝','♛','♚','♙','♖','♘','♗','♕','♔'];
@@ -47,7 +76,7 @@ pub fn print_move(chess_move: u32, is_unicode: bool, player: PlayerColor) {
         }
     };
     let capture_code = decode_piece_captured!(chess_move);
-    let piece_captured = match player {
+    let piece_captured = if capture_code == 7 {'-'} else {match player {
         PlayerColor::White => {
             if is_unicode {unicode_chars[(capture_code+6) as usize]}
                              else {ascii_chars[(capture_code+6) as usize]}
@@ -56,7 +85,7 @@ pub fn print_move(chess_move: u32, is_unicode: bool, player: PlayerColor) {
             if is_unicode {unicode_chars[capture_code as usize]} 
                             else {ascii_chars[capture_code as usize]}
         }
-        };
+        }};
     let is_capture = if capture_code == 7 {0} else {1};
     
     println!("{}{}{}{}{}       {}             {}                 {}          {}         {}         {}",

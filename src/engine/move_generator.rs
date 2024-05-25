@@ -1,7 +1,7 @@
 
 use crate::{engine::bitboard_utils::base_operations::pop_bit, utils::util_enums::{PlayerColor}};
 
-use super::{bitboard_utils::{base_operations::{get_bit, get_lsb_index, print_bit_board}, bitboard_constants::{BLACK_KING_SIDE_CASTLE, BLACK_QUEEN_SIDE_CASTLE, FILLED_BOARD, IS_23456_ROW, IS_2_ROW, IS_34567_ROW, IS_7_ROW, WHITE_KING_SIDE_CASTLE, WHITE_QUEEN_SIDE_CASTLE}}, game_state::game_state, init::attack_map, move_utils::{get_attacks_bishop, get_attacks_queen, get_attacks_rook}};
+use super::{binary_move::MoveList, bitboard_utils::{base_operations::{get_bit, get_lsb_index, print_bit_board}, bitboard_constants::{BLACK_KING_SIDE_CASTLE, BLACK_QUEEN_SIDE_CASTLE, FILLED_BOARD, IS_23456_ROW, IS_2_ROW, IS_34567_ROW, IS_7_ROW, WHITE_KING_SIDE_CASTLE, WHITE_QUEEN_SIDE_CASTLE}}, game_state::game_state, init::attack_map, move_utils::{get_attacks_bishop, get_attacks_queen, get_attacks_rook}};
 
 //a function to check if a particular square is being attacked by a side
 #[inline(always)]
@@ -87,7 +87,7 @@ pub fn print_attacked_squares(side:&PlayerColor,game:&game_state,piece_attack_ma
 
 //a function to get whether a position is in check and the type of check (single, double, no check)
 #[inline(always)]
-pub fn get_check_type(side:&PlayerColor,game:&game_state,piece_attack_map:&attack_map,king_position:u8,all_occupancies:u64) -> (u8,u64) {
+pub fn get_check_type(side:PlayerColor,game:&game_state,piece_attack_map:&attack_map,king_position:u8,all_occupancies:u64) -> (u8,u64) {
     let mut defense_pattern:u64 = FILLED_BOARD;
     let mut check_type:u8 = 0;
     let mut attacker_map;
@@ -209,7 +209,8 @@ pub fn get_check_type(side:&PlayerColor,game:&game_state,piece_attack_map:&attac
     return (check_type,defense_pattern);
 }   
 
-pub fn generate_moves(side:&PlayerColor,game:&game_state,piece_attack_map:&attack_map) {
+pub fn generate_moves(side:PlayerColor,game:&game_state,piece_attack_map:&attack_map) -> MoveList{
+    let move_list = MoveList::new(side);
     let mut starting_square:u8;
     let mut ending_square:u8;
     let mut single_pawn_moves:u64;
@@ -590,4 +591,5 @@ pub fn generate_moves(side:&PlayerColor,game:&game_state,piece_attack_map:&attac
         }
         king_bitboard = pop_bit!(king_bitboard,starting_square);
     }
+    move_list
 }

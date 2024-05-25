@@ -9,6 +9,8 @@ pub enum BoardSquares {
     A8, B8, C8, D8, E8, F8, G8, H8
 }
 
+#[derive(Copy)]
+#[derive(Clone)]
 pub enum PlayerColor {
     Black = 1,
     White = 0
