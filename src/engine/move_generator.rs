@@ -23,12 +23,12 @@ pub fn is_square_attacked(square:u8,side:&PlayerColor,game:&game_state,piece_att
             
             //check for bishop
             let attacks_bishop = get_attacks_bishop(square, game.occupancy_bitboards[0] | game.occupancy_bitboards[1], 
-                piece_attack_maps.bishop_relevant_occupancy, piece_attack_maps.bishop_attack_maps);
+                &piece_attack_maps.bishop_relevant_occupancy, &piece_attack_maps.bishop_attack_maps);
             if (attacks_bishop & game.piece_bitboards[3] & game.occupancy_bitboards[0])!=0 {return 1}
             
             //check for rook
             let attacks_rook = get_attacks_rook(square, game.occupancy_bitboards[0] | game.occupancy_bitboards[1], 
-                piece_attack_maps.rook_relevant_occupancy, piece_attack_maps.rook_attack_maps);
+                &piece_attack_maps.rook_relevant_occupancy, &piece_attack_maps.rook_attack_maps);
             if (attacks_rook & game.piece_bitboards[1] & game.occupancy_bitboards[0])!=0 {return 1}
             
             //check for queen
@@ -54,12 +54,12 @@ pub fn is_square_attacked(square:u8,side:&PlayerColor,game:&game_state,piece_att
 
             //check for bishop
             let attacks_bishop = get_attacks_bishop(square, game.occupancy_bitboards[0] | game.occupancy_bitboards[1], 
-                piece_attack_maps.bishop_relevant_occupancy, piece_attack_maps.bishop_attack_maps);
+                &piece_attack_maps.bishop_relevant_occupancy, &piece_attack_maps.bishop_attack_maps);
             if (attacks_bishop & game.piece_bitboards[3] & game.occupancy_bitboards[1])!=0 {return 1}
             
             //check for rook
             let attacks_rook = get_attacks_rook(square, game.occupancy_bitboards[0] | game.occupancy_bitboards[1], 
-                piece_attack_maps.rook_relevant_occupancy, piece_attack_maps.rook_attack_maps);
+                &piece_attack_maps.rook_relevant_occupancy, &piece_attack_maps.rook_attack_maps);
             if (attacks_rook & game.piece_bitboards[1] & game.occupancy_bitboards[1])!=0 {return 1}
 
             //check for queen
@@ -97,8 +97,8 @@ pub fn get_check_type(side:PlayerColor,game:&game_state,piece_attack_map:&attack
     match side {
         PlayerColor::White => {
             let bishop_attack_pattern = get_attacks_bishop(king_position, all_occupancies, 
-                                                piece_attack_map.bishop_relevant_occupancy, 
-                                                piece_attack_map.bishop_attack_maps);
+                                                &piece_attack_map.bishop_relevant_occupancy, 
+                                                &piece_attack_map.bishop_attack_maps);
             
             //handle diagonal attacks from bishops and queens
             attacker_map = bishop_attack_pattern & ((game.piece_bitboards[3] | game.piece_bitboards[4]) & game.occupancy_bitboards[1]);
@@ -108,13 +108,13 @@ pub fn get_check_type(side:PlayerColor,game:&game_state,piece_attack_map:&attack
                 }
                 check_type = check_type + 1;
                 opponent_attacker_pattern = get_attacks_bishop(attacker_position, all_occupancies, 
-                                                        piece_attack_map.bishop_relevant_occupancy, 
-                                                        piece_attack_map.bishop_attack_maps);
+                                                        &piece_attack_map.bishop_relevant_occupancy, 
+                                                        &piece_attack_map.bishop_attack_maps);
                 defense_pattern = (bishop_attack_pattern & opponent_attacker_pattern) | attacker_map;
             }
             let rook_attack_pattern = get_attacks_rook(king_position, all_occupancies, 
-                                                piece_attack_map.rook_relevant_occupancy, 
-                                                piece_attack_map.rook_attack_maps);
+                                                &piece_attack_map.rook_relevant_occupancy, 
+                                                &piece_attack_map.rook_attack_maps);
             
 
 
@@ -127,8 +127,8 @@ pub fn get_check_type(side:PlayerColor,game:&game_state,piece_attack_map:&attack
                 check_type = check_type + 1;
                 if check_type >= 2{return (2,0)}
                 opponent_attacker_pattern = get_attacks_rook(attacker_position, all_occupancies, 
-                                                        piece_attack_map.rook_relevant_occupancy, 
-                                                        piece_attack_map.rook_attack_maps);
+                                                        &piece_attack_map.rook_relevant_occupancy, 
+                                                        &piece_attack_map.rook_attack_maps);
                 defense_pattern = (rook_attack_pattern & opponent_attacker_pattern) | attacker_map;
             }
 
@@ -152,8 +152,8 @@ pub fn get_check_type(side:PlayerColor,game:&game_state,piece_attack_map:&attack
         }
         PlayerColor::Black => {
             let bishop_attack_pattern = get_attacks_bishop(king_position, all_occupancies, 
-                                                piece_attack_map.bishop_relevant_occupancy, 
-                                                piece_attack_map.bishop_attack_maps);
+                                                &piece_attack_map.bishop_relevant_occupancy, 
+                                                &piece_attack_map.bishop_attack_maps);
             
             //handle diagonal attacks from bishops and queens
             attacker_map = bishop_attack_pattern & ((game.piece_bitboards[3] | game.piece_bitboards[4]) & game.occupancy_bitboards[0]);
@@ -163,13 +163,13 @@ pub fn get_check_type(side:PlayerColor,game:&game_state,piece_attack_map:&attack
                 }
                 check_type = check_type + 1;
                 opponent_attacker_pattern = get_attacks_bishop(attacker_position, all_occupancies, 
-                                                        piece_attack_map.bishop_relevant_occupancy, 
-                                                        piece_attack_map.bishop_attack_maps);
+                                                        &piece_attack_map.bishop_relevant_occupancy, 
+                                                        &piece_attack_map.bishop_attack_maps);
                 defense_pattern = (bishop_attack_pattern & opponent_attacker_pattern) | attacker_map;
             }
             let rook_attack_pattern = get_attacks_rook(king_position, all_occupancies, 
-                                                piece_attack_map.rook_relevant_occupancy, 
-                                                piece_attack_map.rook_attack_maps);
+                                                &piece_attack_map.rook_relevant_occupancy, 
+                                                &piece_attack_map.rook_attack_maps);
             
 
 
@@ -182,8 +182,8 @@ pub fn get_check_type(side:PlayerColor,game:&game_state,piece_attack_map:&attack
                 check_type = check_type + 1;
                 if check_type >= 2{return (2,0)}
                 opponent_attacker_pattern = get_attacks_rook(attacker_position, all_occupancies, 
-                                                        piece_attack_map.rook_relevant_occupancy, 
-                                                        piece_attack_map.rook_attack_maps);
+                                                        &piece_attack_map.rook_relevant_occupancy, 
+                                                        &piece_attack_map.rook_attack_maps);
                 defense_pattern = (rook_attack_pattern & opponent_attacker_pattern) | attacker_map;
             }
 
@@ -490,8 +490,8 @@ pub fn generate_moves(side:PlayerColor,game:&game_state,piece_attack_map:&attack
         }
         
         bishop_attack_pattern = get_attacks_bishop(starting_square, all_occupancies, 
-                                                    piece_attack_map.bishop_relevant_occupancy, 
-                                                    piece_attack_map.bishop_attack_maps) 
+                                                    &piece_attack_map.bishop_relevant_occupancy, 
+                                                    &piece_attack_map.bishop_attack_maps) 
                                                     & (!player_occupancies);
         while bishop_attack_pattern != 0 {
             unsafe{
@@ -518,8 +518,8 @@ pub fn generate_moves(side:PlayerColor,game:&game_state,piece_attack_map:&attack
         }
         
         rook_attack_pattern = get_attacks_rook(starting_square, all_occupancies, 
-                                                    piece_attack_map.rook_relevant_occupancy, 
-                                                    piece_attack_map.rook_attack_maps) 
+                                                    &piece_attack_map.rook_relevant_occupancy, 
+                                                    &piece_attack_map.rook_attack_maps) 
                                                     & (!player_occupancies);
         while rook_attack_pattern != 0 {
             unsafe{
@@ -546,10 +546,10 @@ pub fn generate_moves(side:PlayerColor,game:&game_state,piece_attack_map:&attack
         }
         
         queen_attack_pattern = get_attacks_queen(starting_square, all_occupancies, 
-                                                    piece_attack_map.rook_relevant_occupancy, 
-                                                    piece_attack_map.rook_attack_maps,
-                                                    piece_attack_map.bishop_relevant_occupancy,
-                                                    piece_attack_map.bishop_attack_maps) 
+                                                    &piece_attack_map.rook_relevant_occupancy, 
+                                                    &piece_attack_map.rook_attack_maps,
+                                                    &piece_attack_map.bishop_relevant_occupancy,
+                                                    &piece_attack_map.bishop_attack_maps) 
                                                     & (!player_occupancies);
         while queen_attack_pattern != 0 {
             unsafe{

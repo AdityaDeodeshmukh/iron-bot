@@ -1,3 +1,5 @@
+use std::vec;
+
 use crate::{engine::attack_maps, utils::util_enums::PlayerColor};
 use super::{attack_maps::{  generate_bishop_attack_map, generate_king_attack_map, generate_knight_attack_map, generate_pawn_attack_map, generate_rook_attack_map, get_relevant_occupancy_bits_bishop, get_relevant_occupancy_bits_rook}, 
             bitboard_utils::{base_operations::print_bit_board, 
@@ -23,13 +25,13 @@ rook_relevant_occupancy:
 All relevant occupancies for rook
  */
 pub struct attack_map {
-    pub pawn_attack_maps:[[u64;64];2],
-    pub knight_attack_maps:[u64;64],
-    pub king_attack_maps:[u64;64],
-    pub rook_relevant_occupancy:[u64;64],
-    pub bishop_relevant_occupancy:[u64;64],
-    pub bishop_attack_maps:[[u64;512];64],
-    pub rook_attack_maps:[[u64;4096];64]
+    pub pawn_attack_maps: Vec<Vec<u64>>,
+    pub knight_attack_maps:Vec<u64>,
+    pub king_attack_maps:Vec<u64>,
+    pub rook_relevant_occupancy:Vec<u64>,
+    pub bishop_relevant_occupancy:Vec<u64>,
+    pub bishop_attack_maps:Vec<Vec<u64>>,
+    pub rook_attack_maps:Vec<Vec<u64>>
 }
 
 impl attack_map {
@@ -61,9 +63,9 @@ impl attack_map {
 
 
 //initialize the attack map for bishops with magic indices
-pub fn init_bishop() -> ([[u64;512];64],[u64;64]) {
-    let mut attack_map:[[u64;512];64] = [[0;512];64];
-    let mut bishop_attacks:[u64;64] = [0;64];
+pub fn init_bishop() -> (Vec<Vec<u64>>,Vec<u64>) {
+    let mut attack_map:Vec<Vec<u64>> = vec![vec![0;512];64];
+    let mut bishop_attacks:Vec<u64> = vec![0;64];
     for square in 0..64 {
         let magic_number = BISHOP_MAGIC_NUMBERS[square as usize];
 
@@ -83,9 +85,9 @@ pub fn init_bishop() -> ([[u64;512];64],[u64;64]) {
 }
 
 //initialize the attack map for rooks with magic indices
-pub fn init_rook() -> ([[u64;4096];64],[u64;64]) {
-    let mut attack_map:[[u64;4096];64] = [[0;4096];64];
-    let mut rook_attacks:[u64;64] = [0;64];
+pub fn init_rook() -> (Vec<Vec<u64>>,Vec<u64>) {
+    let mut attack_map:Vec<Vec<u64>> = vec![vec![0;4096];64];
+    let mut rook_attacks:Vec<u64> = vec![0;64];
     for square in 0..64 {
         let magic_number = ROOK_MAGIC_NUMBERS[square as usize];
 
@@ -106,10 +108,10 @@ pub fn init_rook() -> ([[u64;4096];64],[u64;64]) {
 
 
 //initialize attack maps for pawn,knight and king
-pub fn init_simple_pieces() -> ([[u64;64];2],[u64;64],[u64;64]) {
-    let mut pawn_attack_map:[[u64;64];2] = [[0;64];2];
-    let mut knight_attack_map:[u64;64] = [0;64];
-    let mut king_attack_map:[u64;64] = [0;64];
+pub fn init_simple_pieces() -> (Vec<Vec<u64>>,Vec<u64>,Vec<u64>) {
+    let mut pawn_attack_map:Vec<Vec<u64>> = vec![vec![0;64];2];
+    let mut knight_attack_map:Vec<u64> = vec![0;64];
+    let mut king_attack_map:Vec<u64> = vec![0;64];
     for square in 0..64 {
         pawn_attack_map[0][square as usize] = generate_pawn_attack_map(square, PlayerColor::White);
         pawn_attack_map[1][square as usize] = generate_pawn_attack_map(square, PlayerColor::Black);
