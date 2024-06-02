@@ -9,20 +9,19 @@ piece_bitboards:   [Pawns, Rooks, Knights, Bishops, Queen, King]
 Occupancy_bitboards: [White Occupancies, Black Occupancies]
 en_pessant_sqaure: Square on which en pessant is possible (65 if not possible)
 side_to_move: true if white's move, false if black's move
-castle_wk: If castling is possible for white on king's side
-castle_wq: If castling is possible for white on Queen's side
-castle_bk: If castling is possible for black on king's side
-castle_bq: If castling is possible for black on Queen's side
+castle_flags : 
+0001 -> White King Side Castle
+0010 -> White Queen Side Castle
+0100 -> Black King Side Castle
+1000 -> Black Queen Side Castle
  */
 pub struct game_state {
     pub piece_bitboards:[u64;6],
     pub occupancy_bitboards:[u64;2],
     pub en_pessant_square:u8,
     pub side_to_move:bool,
-    pub castle_wk:bool,
-    pub castle_wq:bool,
-    pub castle_bk:bool,
-    pub castle_bq:bool
+    pub castle_flags:u8,
+   
 }
 
 impl game_state {
@@ -33,29 +32,22 @@ impl game_state {
             occupancy_bitboards:[0;2],
             en_pessant_square:65,
             side_to_move:true,
-            castle_wk:false,
-            castle_wq:false,
-            castle_bk:false,
-            castle_bq:false
+            castle_flags:0000
         }
     }
-
+    
     //load a game state from a particular FEN
     pub fn new_from_fen(fen_string:&String) -> game_state {
         let mut piece_bitboards:[u64;6] = [0;6];
-        let mut occupancies_bitboards:[u64;2] = [0;2];
+        let mut occupancy_bitboards:[u64;2] = [0;2];
         //let ascii_codes = ['P','R','N','B','Q','K','p','r','n','b','q','k'];
-        let mut player_move = true; 
-        let mut k_castling_w = false;
-        let mut q_castling_w = false;
-        let mut k_castling_b = false;
-        let mut q_castling_b = false;
-        let mut en_pessant_sqr:u8 = 65;
+        let mut side_to_move = true; 
+        let mut en_pessant_square:u8 = 65;
         let mut row = 7;
         let mut column = 0;
         let mut curr_ptr;
         let mut state = 0;
-
+        let mut castle_flags = 0;
         //iterate over characters
         for letter in fen_string.chars() {
             curr_ptr = row * 8 + column;
@@ -70,73 +62,73 @@ impl game_state {
                         //White King
                         'K' => {
                             piece_bitboards[5] = set_bit!(piece_bitboards[5],curr_ptr);
-                            occupancies_bitboards[0] = set_bit!(occupancies_bitboards[0],curr_ptr);
+                            occupancy_bitboards[0] = set_bit!(occupancy_bitboards[0],curr_ptr);
                             column+=1;
                         },
                         //White Queen
                         'Q' => {
                             piece_bitboards[4] = set_bit!(piece_bitboards[4],curr_ptr);
-                            occupancies_bitboards[0] = set_bit!(occupancies_bitboards[0],curr_ptr);
+                            occupancy_bitboards[0] = set_bit!(occupancy_bitboards[0],curr_ptr);
                             column+=1;
                         },
                         //White Bishop
                         'B' => {
                             piece_bitboards[3] = set_bit!(piece_bitboards[3],curr_ptr);
-                            occupancies_bitboards[0] = set_bit!(occupancies_bitboards[0],curr_ptr);
+                            occupancy_bitboards[0] = set_bit!(occupancy_bitboards[0],curr_ptr);
                             column+=1;
                         },
                         //White Knight
                         'N' => {
                             piece_bitboards[2] = set_bit!(piece_bitboards[2],curr_ptr);
-                            occupancies_bitboards[0] = set_bit!(occupancies_bitboards[0],curr_ptr);
+                            occupancy_bitboards[0] = set_bit!(occupancy_bitboards[0],curr_ptr);
                             column+=1;
                         },
                         //White Rook
                         'R' => {
                             piece_bitboards[1] = set_bit!(piece_bitboards[1],curr_ptr);
-                            occupancies_bitboards[0] = set_bit!(occupancies_bitboards[0],curr_ptr);
+                            occupancy_bitboards[0] = set_bit!(occupancy_bitboards[0],curr_ptr);
                             column+=1;
                         },
                         //White Pawn
                         'P' => {
                             piece_bitboards[0] = set_bit!(piece_bitboards[0],curr_ptr);
-                            occupancies_bitboards[0] = set_bit!(occupancies_bitboards[0],curr_ptr);
+                            occupancy_bitboards[0] = set_bit!(occupancy_bitboards[0],curr_ptr);
                             column+=1;
                         },
                         //Black King
                         'k' => {
                             piece_bitboards[5] = set_bit!(piece_bitboards[5],curr_ptr);
-                            occupancies_bitboards[1] = set_bit!(occupancies_bitboards[1],curr_ptr);
+                            occupancy_bitboards[1] = set_bit!(occupancy_bitboards[1],curr_ptr);
                             column+=1;
                         },
                         //Black Queen
                         'q' => {
                             piece_bitboards[4] = set_bit!(piece_bitboards[4],curr_ptr);
-                            occupancies_bitboards[1] = set_bit!(occupancies_bitboards[1],curr_ptr);
+                            occupancy_bitboards[1] = set_bit!(occupancy_bitboards[1],curr_ptr);
                             column+=1;
                         },
                         //Black Bishop
                         'b' => {
                             piece_bitboards[3] = set_bit!(piece_bitboards[3],curr_ptr);
-                            occupancies_bitboards[1] = set_bit!(occupancies_bitboards[1],curr_ptr);
+                            occupancy_bitboards[1] = set_bit!(occupancy_bitboards[1],curr_ptr);
                             column+=1;
                         },
                         //Black Knight
                         'n' => {
                             piece_bitboards[2] = set_bit!(piece_bitboards[2],curr_ptr);
-                            occupancies_bitboards[1] = set_bit!(occupancies_bitboards[1],curr_ptr);
+                            occupancy_bitboards[1] = set_bit!(occupancy_bitboards[1],curr_ptr);
                             column+=1;
                         },
                         //Black Rook
                         'r' => {
                             piece_bitboards[1] = set_bit!(piece_bitboards[1],curr_ptr);
-                            occupancies_bitboards[1] = set_bit!(occupancies_bitboards[1],curr_ptr);
+                            occupancy_bitboards[1] = set_bit!(occupancy_bitboards[1],curr_ptr);
                             column+=1;
                         },
                         //Black Pawn
                         'p' => {
                             piece_bitboards[0] = set_bit!(piece_bitboards[0],curr_ptr);
-                            occupancies_bitboards[1] = set_bit!(occupancies_bitboards[1],curr_ptr);
+                            occupancy_bitboards[1] = set_bit!(occupancy_bitboards[1],curr_ptr);
                             column+=1;
                         },
                         '0'..='9' => {
@@ -154,18 +146,18 @@ impl game_state {
                 //1 state gets which player's move it is
                 1 => {
                     match letter {
-                        'w' => player_move = true,
-                        'b' => player_move = false,
+                        'w' => side_to_move = true,
+                        'b' => side_to_move = false,
                         _ => panic!("FEN provided is invalid")
                     }
                 }
                 //2 state gets castling info
                 2 => {
                     match letter {
-                        'K' => k_castling_w = true,
-                        'Q' => q_castling_w = true,
-                        'k' => k_castling_b = true,
-                        'q' => q_castling_b = true,
+                        'K' => castle_flags |= 0b0001,
+                        'Q' => castle_flags |= 0b0010,
+                        'k' => castle_flags |= 0b0100,
+                        'q' => castle_flags |= 0b1000,
                         '-' => {},
                         _ => panic!("FEN provided is invalid")
                     }
@@ -173,8 +165,8 @@ impl game_state {
                 //3 state gets the en pessant square
                 3 => {
                     match letter {
-                        'a'..='h' => en_pessant_sqr = (letter as u32 - 'a' as u32) as u8,
-                        '1'..='8' => en_pessant_sqr += ((letter.to_digit(10).unwrap()-1)*8) as u8,
+                        'a'..='h' => en_pessant_square = (letter as u32 - 'a' as u32) as u8,
+                        '1'..='8' => en_pessant_square += ((letter.to_digit(10).unwrap()-1)*8) as u8,
                         '-' => {},
                         _ => panic!("FEN provided is invalid")
                     }
@@ -199,20 +191,22 @@ impl game_state {
             
         }
         game_state {
-            piece_bitboards:piece_bitboards,
-            occupancy_bitboards:occupancies_bitboards,
-            en_pessant_square:en_pessant_sqr,
-            side_to_move:player_move,
-            castle_wk:k_castling_w,
-            castle_wq:q_castling_w,
-            castle_bk:k_castling_b,
-            castle_bq:q_castling_b
+            piece_bitboards,
+            occupancy_bitboards,
+            en_pessant_square,
+            side_to_move,
+            castle_flags
         }
     }
 
+    
     pub fn print_game_state(&self,unicode:bool) {
         let unicode_chars = ['♟','♜','♞','♝','♛','♚','♙','♖','♘','♗','♕','♔'];
         let ascii_chars =  ['P','R','N','B','Q','K','p','r','n','b','q','k'];
+        let castle_wk = if (self.castle_flags & 0b0001) != 0 {true} else {false};
+        let castle_wq = if (self.castle_flags & 0b0010) != 0 {true} else {false};
+        let castle_bk = if (self.castle_flags & 0b0100) != 0 {true} else {false};
+        let castle_bq = if (self.castle_flags & 0b1000) != 0 {true} else {false};
         for row in (0..=7).rev() {
             print!("{}   ",row+1);
             for file in 0..=7 {
@@ -246,8 +240,8 @@ impl game_state {
         println!("     a  b  c  d  e  f  g  h");
         println!("       Side to move: {}",if self.side_to_move{"White"} else {"Black"});
         println!("         En Pessant: {}",if self.en_pessant_square!=65{self.en_pessant_square.to_string()}else{"No".to_string()});
-        print!("         Castling: {}", if self.castle_wk{'K'} else {'-'});
-        print!("{}{}{}", if self.castle_wq{'Q'} else {'-'},if self.castle_bk{'k'} else {'-'},if self.castle_bq{'q'} else {'-'});
+        print!("         Castling: {}", if castle_wk{'K'} else {'-'});
+        print!("{}{}{}", if castle_wq{'Q'} else {'-'},if castle_bk{'k'} else {'-'},if castle_bq{'q'} else {'-'});
         println!("\n")
     }
 }

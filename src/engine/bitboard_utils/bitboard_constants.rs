@@ -404,3 +404,15 @@ pub const BISHOP_MAGIC_NUMBERS:[u64;64] = [ 18018832060792964,
                                             9878791228517523968,
                                             4616190786973859872];
 
+
+pub const PIECE_PAWN:u32 = 0;
+pub const PIECE_ROOK:u32 = 1;
+pub const PIECE_KNIGHT:u32 = 2;
+pub const PIECE_BISHOP:u32 = 3;
+pub const PIECE_QUEEN:u32 = 4;
+pub const PIECE_KING:u32 = 5;
+pub const PIECE_NONE:u32 = 7;
+pub const PROMOTION_QUEEN:u32 = 0;
+pub const PROMOTION_ROOK:u32 = 1;
+pub const PROMOTION_KNIGHT:u32 = 2;
+pub const PROMOTION_BISHOP:u32 = 3;

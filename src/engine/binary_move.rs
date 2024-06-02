@@ -30,16 +30,17 @@ impl MoveList {
         self.count += 1;
     }
 
-    pub fn print_move_list(self,is_unicode: bool) {
-        println!("Move        Piece_Moved   Piece_Captured    Capture    Double    Enpass    castling");
+    pub fn print_move_list(&self,is_unicode: bool) {
+        println!("Move        Piece_Moved   Piece_Captured    Is Promotion    Double    Enpass    castling");
         if self.count == 0 {
             println!("            No moves in the movelist");
             return;
         }
-        println!("{}",self.count);
         for i in 0..(self.count) {
             print_move(self.moves[i as usize], is_unicode,&self.player)
         }
+        println!("Total Moves:{}",self.count);
+
     }
 }
 
@@ -49,7 +50,7 @@ pub fn print_move(chess_move: u32, is_unicode: bool, player: &PlayerColor) {
     let starting_square = decode_initial_square!(chess_move) as u8;
     let ending_square = decode_final_square!(chess_move) as u8;
     let unicode_chars = ['♟','♜','♞','♝','♛','♚','♙','♖','♘','♗','♕','♔'];
-    let promoted_chars = ['R','N','B','Q','r','n','b','q'];
+    let promoted_chars = ['Q','R','N','B','q','r','n','b'];
     let ascii_chars =  ['P','R','N','B','Q','K','p','r','n','b','q','k'];
     let double_push = decode_double_push!(chess_move);
     let enpass = decode_en_pessant!(chess_move);
@@ -87,11 +88,12 @@ pub fn print_move(chess_move: u32, is_unicode: bool, player: &PlayerColor) {
         }
         }};
     let is_capture = if capture_code == 7 {0} else {1};
+    let is_promotion = decode_promotion!(chess_move);
     
-    println!("{}{}{}{}{}       {}             {}                 {}          {}         {}         {}",
+    println!("{}{}{}{}{}       {}             {}                 {}               {}         {}         {}",
                             ((starting_square%8+b'a') as char),((starting_square/8+b'1') as char),
                             ((ending_square%8+b'a') as char),((ending_square/8+b'1') as char), promotion_char,
-                                piece_moved,if is_capture==1 {piece_captured} else {'-'},is_capture,
+                                piece_moved,if is_capture==1 {piece_captured} else {'-'},is_promotion,
                             double_push,enpass,castle);
     
 }
@@ -99,13 +101,13 @@ pub fn print_move(chess_move: u32, is_unicode: bool, player: &PlayerColor) {
 // Macro to encode the move
 macro_rules! encode_move {
     ($initial_square:expr,$final_square:expr,$piece_moved:expr,
-        $piece_captured:expr,$piece_promoted:expr,$capture:expr,$double_push:expr,$en_pessant:expr,$castling:expr) => {
+        $piece_captured:expr,$piece_promoted:expr,$is_promotion:expr,$double_push:expr,$en_pessant:expr,$castling:expr) => {
         $initial_square |
         $final_square << 6 |
         $piece_moved << 12 |
         $piece_captured << 15 |
         $piece_promoted << 18 |
-        $capture << 20 |
+        $is_promotion << 20 |
         $double_push << 21 |
         $en_pessant << 22 |
         $castling << 23
@@ -181,7 +183,7 @@ pub(crate) use decode_en_pessant;
 
 macro_rules! decode_castling {
     ($chess_move:expr) => {
-        ($chess_move & 0x800000) >> 20
+        ($chess_move & 0x800000) >> 23
     };
 }
 pub(crate) use decode_castling;
